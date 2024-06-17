@@ -1,24 +1,24 @@
 {
-    "manifest_version": 3,
-    "name": "Hoobuy Remove Risk Warning",
-    "version": "1.0",
-    "description": "Remove risk warning elements from the hoobuy.com site.",
-    "permissions": ["activeTab", "scripting"],
-    "background": {
-      "service_worker": "background.js"
-    },
-    "action": {
-      "default_icon": {
-        "16": "icon16.png",
-        "48": "icon48.png",
-        "128": "icon128.png"
-      }
-    },
-    "content_scripts": [
-      {
-        "matches": ["https://hoobuy.com/*"],
-        "js": ["content.js"]
-      }
-    ]
-  }
-  
+  "manifest_version": 3,
+  "name": "Hoobuy Remove Risk Warning",
+  "version": "1.0",
+  "description": "Remove risk warning elements from the hoobuy.com site.",
+  "permissions": ["activeTab", "scripting", "storage", "tabs"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://hoobuy.com/*"],
+      "js": ["content.js"]
+    }
+  ]
+}
