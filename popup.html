@@ -1,63 +1,124 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Toggle Risk Warning Removal</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Remove Risk Warning</title>
   <style>
     body {
       font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      width: 200px;
+      background-color: #f9f9f9;
+    }
+    h1 {
+      font-size: 18px;
+      margin: 0 0 10px;
+    }
+    button {
+      display: block;
+      width: 100%;
       padding: 10px;
-    }
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 60px;
-      height: 34px;
-    }
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-    .slider {
-      position: absolute;
+      margin-bottom: 10px;
+      background-color: #ffae00;
+      color: white;
+      border: none;
       cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #ccc;
-      transition: .4s;
+      text-align: center;
+      font-size: 16px;
     }
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 26px;
-      width: 26px;
-      left: 4px;
-      bottom: 4px;
-      background-color: white;
-      transition: .4s;
+    button:hover {
+      background-color: rgba(255, 174, 0, 0.582);
     }
-    input:checked + .slider {
-      background-color: #2196F3;
+    .info {
+      font-size: 12px;
+      margin-top: 10px;
     }
-    input:checked + .slider:before {
-      transform: translateX(26px);
+    .icon {
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
-    .slider.round {
-      border-radius: 34px;
-    }
-    .slider.round:before {
-      border-radius: 50%;
+    .icon img {
+      width: 32px;
+      height: 32px;
+      margin-bottom: 10px;
     }
   </style>
 </head>
 <body>
-  <h3>Risk Warning Removal</h3>
-  <label class="switch">
-    <input type="checkbox" id="toggleSwitch">
-    <span class="slider round"></span>
-  </label>
-  <script src="popup.js"></script>
+  <div class="icon">
+    <img src="icon128.png" alt="Extension Icon">
+  </div>
+  <h1>Remove Risk Warning</h1>
+  <button id="toggle-button">Deactivate</button>
+  <div class="info">
+    <p>If you can, support me: <a href="https://hoobuy.com?utm_source=ambassador&utm_medium=linksharing&inviteCode=nE5Pdg4X" target="_blank">hoobuy.com</a></p>
+    <p>GitHub: <a href="https://github.com/isaacddsantiago" target="_blank">isaacddsantiago</a></p>
+    <p>Discord: .zaac</p>
+  </div>
+  <script>
+    const toggleButton = document.getElementById('toggle-button');
+    let isActive = true;
+
+    toggleButton.addEventListener('click', () => {
+      isActive = !isActive;
+      toggleButton.textContent = isActive ? 'Deactivate' : 'Activate';
+      chrome.storage.local.set({ isActive });
+      chrome.scripting.executeScript({
+        target: { allFrames: true },
+        function: setActiveState,
+        args: [isActive]
+      });
+    });
+
+    chrome.storage.local.get('isActive', (data) => {
+      if (data.isActive === false) {
+        isActive = false;
+        toggleButton.textContent = 'Activate';
+      }
+    });
+
+    function setActiveState(active) {
+      if (active) {
+        chrome.scripting.executeScript({
+          target: { allFrames: true },
+          function: removeRiskWarning
+        });
+      }
+    }
+
+    function removeRiskWarning() {
+      const riskWarningDialog = document.querySelector('.el-overlay[style="z-index: 2005;"]');
+      if (riskWarningDialog) {
+        console.log('Risk warning dialog found and removed');
+        riskWarningDialog.remove();
+      } else {
+        console.log('Risk warning dialog not found');
+      }
+
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach(() => {
+          removeRiskWarning();
+        });
+      });
+
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
+
+    // Initial execution
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        if (isActive) {
+          setActiveState(true);
+        }
+      });
+    } else {
+      if (isActive) {
+        setActiveState(true);
+      }
+    }
+  </script>
 </body>
 </html>
